@@ -1,144 +1,144 @@
-{<!DOCTYPE html>
-    <html lang="fi">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Vaatehaku POC (Fuse.js)</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
-        <style type="text/tailwindcss">
-            /* Tailwind-laajennukset ja perusasetukset */
-            body {
-                @apply bg-gray-100 font-sans;
-            }
-            .product-card {
-                 @apply bg-white border border-gray-200 rounded-lg shadow p-4 text-center flex flex-col justify-between transition-shadow duration-200 hover:shadow-md;
-            }
-            .product-image {
-                 @apply w-full h-48 object-cover mb-3 rounded bg-gray-200;
-            }
-            .product-title {
-                @apply text-lg font-semibold text-gray-800 mb-1;
-            }
-            .product-details {
-                @apply text-sm text-gray-600 mb-2;
-            }
-            .product-price {
-                @apply text-md font-bold text-gray-900 mb-3;
-            }
-            .product-link {
-                @apply inline-block mt-auto px-4 py-2 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 transition duration-150;
-            }
-        </style>
-    </head>
-    <body class="p-4 md:p-8">
-    
-        <div class="max-w-6xl mx-auto">
-            <h1 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 text-center">Vaatehaku POC (Fuse.js)</h1>
-    
-            <div class="mb-8 bg-white p-5 rounded-lg shadow-md">
-                <label for="searchInput" class="block mb-2 text-sm font-medium text-gray-700">Etsi tyyliä tai vaatetta (esim. goth mekko, grunce paita):</label>
-                <div class="flex flex-col md:flex-row">
-                    <input type="text" id="searchInput" placeholder="esim. goth, grunge paita..." class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 mb-2 md:mb-0 md:mr-2">
-                    <button id="searchButton" class="px-5 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap">
-                        Hae
-                    </button>
-                </div>
-            </div>
-    
-            <h2 class="text-xl font-semibold mb-4 text-gray-700">Tulokset:</h2>
-            <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <p class="text-gray-500 col-span-full">Ei hakua vielä tehty.</p>
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaatehaku POC (Fuse.js)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+    <style type="text/tailwindcss">
+        /* Tailwind-laajennukset ja perusasetukset */
+        body {
+            @apply bg-gray-100 font-sans;
+        }
+        .product-card {
+             @apply bg-white border border-gray-200 rounded-lg shadow p-4 text-center flex flex-col justify-between transition-shadow duration-200 hover:shadow-md;
+        }
+        .product-image {
+             @apply w-full h-48 object-cover mb-3 rounded bg-gray-200;
+        }
+        .product-title {
+            @apply text-lg font-semibold text-gray-800 mb-1;
+        }
+        .product-details {
+            @apply text-sm text-gray-600 mb-2;
+        }
+        .product-price {
+            @apply text-md font-bold text-gray-900 mb-3;
+        }
+        .product-link {
+            @apply inline-block mt-auto px-4 py-2 bg-gray-800 text-white text-sm rounded hover:bg-gray-900 transition duration-150;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 text-center">Vaatehaku POC (Fuse.js)</h1>
+
+        <div class="mb-8 bg-white p-5 rounded-lg shadow-md">
+            <label for="searchInput" class="block mb-2 text-sm font-medium text-gray-700">Etsi tyyliä tai vaatetta (esim. goth mekko, grunce paita):</label>
+            <div class="flex flex-col md:flex-row">
+                <input type="text" id="searchInput" placeholder="esim. goth, grunge paita..." class="flex-grow p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 mb-2 md:mb-0 md:mr-2">
+                <button id="searchButton" class="px-5 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 whitespace-nowrap">
+                    Hae
+                </button>
             </div>
         </div>
-    
-        <script>
-            // Kovakoodattu datamalli (Mock Data)
-            const mockProducts = [
-                { id: 1, name: "Velvet Gothic Maxi Dress", style: "gothic", type: "dress", price: "€89.90", imageUrl: "https://placehold.co/300x400/000000/FFFFFF?text=Gothic+Dress", storeUrl: "#" },
-                { id: 2, name: "Ripped Grunge Jeans", style: "grunge", type: "jeans", price: "€55.00", imageUrl: "https://placehold.co/300x400/808080/FFFFFF?text=Grunge+Jeans", storeUrl: "#" },
-                { id: 3, name: "Floral Coquette Blouse", style: "coquette", type: "blouse", price: "€42.50", imageUrl: "https://placehold.co/300x400/FFC0CB/000000?text=Coquette+Blouse", storeUrl: "#" },
-                { id: 4, name: "Black Platform Boots", style: "gothic", type: "boots", price: "€110.00", imageUrl: "https://placehold.co/300x400/2F4F4F/FFFFFF?text=Gothic+Boots", storeUrl: "#" },
-                { id: 5, name: "Plaid Grunge Shirt", style: "grunge", type: "shirt", price: "€38.00", imageUrl: "https://placehold.co/300x400/A52A2A/FFFFFF?text=Grunge+Shirt", storeUrl: "#" },
-                { id: 6, name: "Lace Trim Coquette Skirt", style: "coquette", type: "skirt", price: "€48.00", imageUrl: "https://placehold.co/300x400/FFF0F5/000000?text=Coquette+Skirt", storeUrl: "#" },
-                { id: 7, name: "Studded Gothic Belt", style: "gothic", type: "accessory", price: "€25.00", imageUrl: "https://placehold.co/300x400/1a1a1a/FFFFFF?text=Gothic+Belt", storeUrl: "#"},
-                { id: 8, name: "Oversized Grunge Hoodie", style: "grunge", type: "hoodie", price: "€65.00", imageUrl: "https://placehold.co/300x400/696969/FFFFFF?text=Grunge+Hoodie", storeUrl: "#"}
-            ];
-    
-            // Fuse.js asetukset
-            const fuseOptions = {
-              // Mitä kenttiä tuotteesta käytetään haussa
-              keys: ['name', 'style', 'type'],
-              includeScore: false, // Ei tarvita relevanssipisteitä vielä
-              threshold: 0.4, // Hakutarkkuus (0.0 = täydellinen osuma, 1.0 = mikä tahansa)
-              ignoreLocation: true, // Etsi osumia mistä tahansa kohdasta tekstiä
-              minMatchCharLength: 2 // Vähimmäismerkki määrä osumalle
-            };
-    
-            // Alustetaan Fuse mock-datalla ja asetuksilla
-            const fuse = new Fuse(mockProducts, fuseOptions);
-    
-            // Hae elementit DOMista
-            const searchInput = document.getElementById('searchInput');
-            const searchButton = document.getElementById('searchButton');
-            const resultsDiv = document.getElementById('results');
-    
-            // Lisää tapahtumankuuntelijat
-            searchButton.addEventListener('click', performSearch);
-            searchInput.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    performSearch();
-                }
+
+        <h2 class="text-xl font-semibold mb-4 text-gray-700">Tulokset:</h2>
+        <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <p class="text-gray-500 col-span-full">Ei hakua vielä tehty.</p>
+        </div>
+    </div>
+
+    <script>
+        // Kovakoodattu datamalli (Mock Data)
+        const mockProducts = [
+            { id: 1, name: "Velvet Gothic Maxi Dress", style: "gothic", type: "dress", price: "€89.90", imageUrl: "https://placehold.co/300x400/000000/FFFFFF?text=Gothic+Dress", storeUrl: "#" },
+            { id: 2, name: "Ripped Grunge Jeans", style: "grunge", type: "jeans", price: "€55.00", imageUrl: "https://placehold.co/300x400/808080/FFFFFF?text=Grunge+Jeans", storeUrl: "#" },
+            { id: 3, name: "Floral Coquette Blouse", style: "coquette", type: "blouse", price: "€42.50", imageUrl: "https://placehold.co/300x400/FFC0CB/000000?text=Coquette+Blouse", storeUrl: "#" },
+            { id: 4, name: "Black Platform Boots", style: "gothic", type: "boots", price: "€110.00", imageUrl: "https://placehold.co/300x400/2F4F4F/FFFFFF?text=Gothic+Boots", storeUrl: "#" },
+            { id: 5, name: "Plaid Grunge Shirt", style: "grunge", type: "shirt", price: "€38.00", imageUrl: "https://placehold.co/300x400/A52A2A/FFFFFF?text=Grunge+Shirt", storeUrl: "#" },
+            { id: 6, name: "Lace Trim Coquette Skirt", style: "coquette", type: "skirt", price: "€48.00", imageUrl: "https://placehold.co/300x400/FFF0F5/000000?text=Coquette+Skirt", storeUrl: "#" },
+            { id: 7, name: "Studded Gothic Belt", style: "gothic", type: "accessory", price: "€25.00", imageUrl: "https://placehold.co/300x400/1a1a1a/FFFFFF?text=Gothic+Belt", storeUrl: "#"},
+            { id: 8, name: "Oversized Grunge Hoodie", style: "grunge", type: "hoodie", price: "€65.00", imageUrl: "https://placehold.co/300x400/696969/FFFFFF?text=Grunge+Hoodie", storeUrl: "#"}
+        ];
+
+        // Fuse.js asetukset
+        const fuseOptions = {
+          // Mitä kenttiä tuotteesta käytetään haussa
+          keys: ['name', 'style', 'type'],
+          includeScore: false, // Ei tarvita relevanssipisteitä vielä
+          threshold: 0.4, // Hakutarkkuus (0.0 = täydellinen osuma, 1.0 = mikä tahansa)
+          ignoreLocation: true, // Etsi osumia mistä tahansa kohdasta tekstiä
+          minMatchCharLength: 2 // Vähimmäismerkki määrä osumalle
+        };
+
+        // Alustetaan Fuse mock-datalla ja asetuksilla
+        const fuse = new Fuse(mockProducts, fuseOptions);
+
+        // Hae elementit DOMista
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const resultsDiv = document.getElementById('results');
+
+        // Lisää tapahtumankuuntelijat
+        searchButton.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // Funktio haun suorittamiseen Fuse.js:llä
+        function performSearch() {
+            const query = searchInput.value.trim();
+            resultsDiv.innerHTML = ''; // Tyhjennä vanhat tulokset
+
+            if (!query) {
+                resultsDiv.innerHTML = '<p class="text-gray-500 col-span-full">Kirjoita hakusana.</p>';
+                return;
+            }
+
+            // Suorita haku Fuse.js:n avulla
+            const fuseResults = fuse.search(query);
+
+            // Muunnetaan Fusen tulokset muotoon, jota displayResults odottaa
+            // Fuse palauttaa listan objekteista, joissa on 'item' (alkuperäinen tuote)
+            const productsToDisplay = fuseResults.map(result => result.item);
+
+            displayResults(productsToDisplay);
+        }
+
+        // Funktio tulosten näyttämiseen
+        function displayResults(products) {
+            resultsDiv.innerHTML = ''; // Varmuuden vuoksi tyhjennys
+
+            if (products.length === 0) {
+                resultsDiv.innerHTML = '<p class="text-gray-500 col-span-full">Ei tuloksia hakusanalla.</p>';
+                return;
+            }
+
+            products.forEach(product => { // Käytetään suoraan product-objektia
+                const productElement = document.createElement('div');
+                productElement.className = 'product-card'; // Tailwind-luokka
+
+                // Käytetään product-objektin kenttiä suoraan
+                productElement.innerHTML = `
+                    <img src="${product.imageUrl}" alt="${product.name}" class="product-image" onerror="this.src='https://placehold.co/300x400/cccccc/969696?text=Kuva+ei+lataudu'; this.onerror=null;">
+                    <div>
+                        <h3 class="product-title">${product.name}</h3>
+                        <p class="product-details">Tyyli: ${product.style}, Tyyppi: ${product.type}</p>
+                        <p class="product-price">${product.price}</p>
+                    </div>
+                    <a href="${product.storeUrl}" target="_blank" class="product-link">Kauppaan (placeholder)</a>
+                `;
+                resultsDiv.appendChild(productElement);
             });
-    
-            // Funktio haun suorittamiseen Fuse.js:llä
-            function performSearch() {
-                const query = searchInput.value.trim();
-                resultsDiv.innerHTML = ''; // Tyhjennä vanhat tulokset
-    
-                if (!query) {
-                    resultsDiv.innerHTML = '<p class="text-gray-500 col-span-full">Kirjoita hakusana.</p>';
-                    return;
-                }
-    
-                // Suorita haku Fuse.js:n avulla
-                const fuseResults = fuse.search(query);
-    
-                // Muunnetaan Fusen tulokset muotoon, jota displayResults odottaa
-                // Fuse palauttaa listan objekteista, joissa on 'item' (alkuperäinen tuote)
-                const productsToDisplay = fuseResults.map(result => result.item);
-    
-                displayResults(productsToDisplay);
-            }
-    
-            // Funktio tulosten näyttämiseen
-            function displayResults(products) {
-                resultsDiv.innerHTML = ''; // Varmuuden vuoksi tyhjennys
-    
-                if (products.length === 0) {
-                    resultsDiv.innerHTML = '<p class="text-gray-500 col-span-full">Ei tuloksia hakusanalla.</p>';
-                    return;
-                }
-    
-                products.forEach(product => { // Käytetään suoraan product-objektia
-                    const productElement = document.createElement('div');
-                    productElement.className = 'product-card'; // Tailwind-luokka
-    
-                    // Käytetään product-objektin kenttiä suoraan
-                    productElement.innerHTML = `
-                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" onerror="this.src='https://placehold.co/300x400/cccccc/969696?text=Kuva+ei+lataudu'; this.onerror=null;">
-                        <div>
-                            <h3 class="product-title">${product.name}</h3>
-                            <p class="product-details">Tyyli: ${product.style}, Tyyppi: ${product.type}</p>
-                            <p class="product-price">${product.price}</p>
-                        </div>
-                        <a href="${product.storeUrl}" target="_blank" class="product-link">Kauppaan (placeholder)</a>
-                    `;
-                    resultsDiv.appendChild(productElement);
-                });
-            }
-    
-        </script>
-    
-    </body>
-    </html>
+        }
+
+    </script>
+
+</body>
+</html>
