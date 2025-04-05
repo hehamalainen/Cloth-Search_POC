@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geo Store API Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        button {
+            margin: 10px 0;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Geo Store API Demo</h1>
+
+    <h2>1. Store Search</h2>
+    <button onclick="fetchStores()">Fetch Stores</button>
+    <pre id="storesOutput">Click the button to fetch stores...</pre>
+
+    <h2>2. Product Search</h2>
+    <button onclick="fetchProducts()">Fetch Products</button>
+    <pre id="productsOutput">Click the button to fetch products...</pre>
+
+    <h2>3. Inventory Check</h2>
+    <button onclick="checkInventory()">Check Inventory</button>
+    <pre id="inventoryOutput">Click the button to check inventory...</pre>
+
+    <h2>4. Create Reservation</h2>
+    <button onclick="createReservation()">Create Reservation</button>
+    <pre id="reservationOutput">Click the button to create a reservation...</pre>
+
+    <script>
+        const apiBase = 'http://localhost:5000/api'; // Update this if you deploy the backend
+
+        async function fetchStores() {
+            const response = await fetch(`${apiBase}/stores?latitude=60.1697&longitude=24.9314&radius=5`);
+            const data = await response.json();
+            document.getElementById('storesOutput').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function fetchProducts() {
+            const response = await fetch(`${apiBase}/products?query=shirt`);
+            const data = await response.json();
+            document.getElementById('productsOutput').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function checkInventory() {
+            const response = await fetch(`${apiBase}/inventory/check?storeId=1&productId=1`);
+            const data = await response.json();
+            document.getElementById('inventoryOutput').textContent = JSON.stringify(data, null, 2);
+        }
+
+        async function createReservation() {
+            const response = await fetch(`${apiBase}/reservations`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    storeId: 1,
+                    productId: 1,
+                    quantity: 1,
+                    userId: 'test-user'
+                }),
+            });
+            const data = await response.json();
+            document.getElementById('reservationOutput').textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>
