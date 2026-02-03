@@ -5,7 +5,7 @@
 # For format details, see: https://gh.io/customagents/config
 
 name: docs-agent
-description:
+description: documentation agent
 ---
 
 # My Agent
