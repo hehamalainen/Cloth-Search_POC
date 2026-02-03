@@ -1,9 +1,9 @@
 {<!DOCTYPE html>
-    <html lang="fi">
+    <html lang="fi" id="htmlRoot">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Vaatehaku POC (Fuse.js)</title>
+        <title id="pageTitle">Vaatehaku POC (Fuse.js)</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
             tailwind.config = {
@@ -40,19 +40,25 @@
     
         <div class="max-w-6xl mx-auto">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Vaatehaku POC (Fuse.js)</h1>
-                <button id="darkModeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200" aria-label="Toggle dark mode">
-                    <svg id="sunIcon" class="w-6 h-6 text-gray-800 dark:text-gray-200 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                    </svg>
-                    <svg id="moonIcon" class="w-6 h-6 text-gray-800 dark:text-gray-200 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-                    </svg>
-                </button>
+                <h1 id="mainTitle" class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Vaatehaku POC (Fuse.js)</h1>
+                <div class="flex gap-2">
+                    <select id="languageSelector" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 text-gray-800 dark:text-gray-200 cursor-pointer border-none outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Select language">
+                        <option value="fi">FI</option>
+                        <option value="en">EN</option>
+                    </select>
+                    <button id="darkModeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200" aria-label="Toggle dark mode">
+                        <svg id="sunIcon" class="w-6 h-6 text-gray-800 dark:text-gray-200 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                        <svg id="moonIcon" class="w-6 h-6 text-gray-800 dark:text-gray-200 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
     
             <div class="mb-8 bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md dark:shadow-lg">
-                <label for="searchInput" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Etsi tyyliä tai vaatetta (esim. goth mekko, grunge paita):</label>
+                <label for="searchInput" id="searchLabel" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Etsi tyyliä tai vaatetta (esim. goth mekko, grunge paita):</label>
                 <div class="flex flex-col md:flex-row">
                     <input type="text" id="searchInput" placeholder="esim. goth, grunge paita..." class="flex-grow p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-400 dark:focus:border-indigo-400 mb-2 md:mb-0 md:mr-2 placeholder-gray-500 dark:placeholder-gray-400">
                     <button id="searchButton" class="px-5 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-md hover:bg-indigo-700 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 dark:focus:ring-offset-gray-900 whitespace-nowrap">
@@ -61,13 +67,92 @@
                 </div>
             </div>
     
-            <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Tulokset:</h2>
+            <h2 id="resultsTitle" class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Tulokset:</h2>
             <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <p class="text-gray-500 dark:text-gray-400 col-span-full">Ei hakua vielä tehty.</p>
+                <p id="noSearchYet" class="text-gray-500 dark:text-gray-400 col-span-full">Ei hakua vielä tehty.</p>
             </div>
         </div>
     
         <script>
+            // Translations
+            const translations = {
+                fi: {
+                    pageTitle: "Vaatehaku POC (Fuse.js)",
+                    mainTitle: "Vaatehaku POC (Fuse.js)",
+                    searchLabel: "Etsi tyyliä tai vaatetta (esim. goth mekko, grunge paita):",
+                    searchPlaceholder: "esim. goth, grunge paita...",
+                    searchButton: "Hae",
+                    resultsTitle: "Tulokset:",
+                    noSearchYet: "Ei hakua vielä tehty.",
+                    noResults: "Ei tuloksia hakusanalla.",
+                    enterSearchTerm: "Kirjoita hakusana.",
+                    style: "Tyyli",
+                    type: "Tyyppi",
+                    goToStore: "Kauppaan (placeholder)"
+                },
+                en: {
+                    pageTitle: "Clothing Search POC (Fuse.js)",
+                    mainTitle: "Clothing Search POC (Fuse.js)",
+                    searchLabel: "Search for style or clothing (e.g. goth dress, grunge shirt):",
+                    searchPlaceholder: "e.g. goth, grunge shirt...",
+                    searchButton: "Search",
+                    resultsTitle: "Results:",
+                    noSearchYet: "No search performed yet.",
+                    noResults: "No results found.",
+                    enterSearchTerm: "Enter a search term.",
+                    style: "Style",
+                    type: "Type",
+                    goToStore: "Go to store (placeholder)"
+                }
+            };
+
+            let currentLanguage = 'fi';
+
+            // Update UI text based on current language
+            function updateLanguage(lang) {
+                currentLanguage = lang;
+                const t = translations[lang];
+                
+                // Update HTML lang attribute
+                document.getElementById('htmlRoot').setAttribute('lang', lang);
+                
+                // Update page title
+                document.getElementById('pageTitle').textContent = t.pageTitle;
+                
+                // Update main title
+                document.getElementById('mainTitle').textContent = t.mainTitle;
+                
+                // Update search section
+                document.getElementById('searchLabel').textContent = t.searchLabel;
+                document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+                document.getElementById('searchButton').textContent = t.searchButton;
+                
+                // Update results section
+                document.getElementById('resultsTitle').textContent = t.resultsTitle;
+                
+                // Update initial message if it exists
+                const noSearchYetElement = document.getElementById('noSearchYet');
+                if (noSearchYetElement) {
+                    noSearchYetElement.textContent = t.noSearchYet;
+                }
+                
+                // Save preference
+                localStorage.setItem('language', lang);
+            }
+
+            // Language selector functionality
+            const languageSelector = document.getElementById('languageSelector');
+            
+            // Check for saved language preference or default to Finnish
+            const savedLanguage = localStorage.getItem('language') || 'fi';
+            currentLanguage = savedLanguage;
+            languageSelector.value = savedLanguage;
+            updateLanguage(savedLanguage);
+            
+            languageSelector.addEventListener('change', (e) => {
+                updateLanguage(e.target.value);
+            });
+
             // Dark mode toggle functionality
             const darkModeToggle = document.getElementById('darkModeToggle');
             const htmlElement = document.documentElement;
@@ -130,7 +215,7 @@
                 resultsDiv.innerHTML = ''; // Tyhjennä vanhat tulokset
     
                 if (!query) {
-                    resultsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 col-span-full">Kirjoita hakusana.</p>';
+                    resultsDiv.innerHTML = `<p class="text-gray-500 dark:text-gray-400 col-span-full">${translations[currentLanguage].enterSearchTerm}</p>`;
                     return;
                 }
     
@@ -147,9 +232,10 @@
             // Funktio tulosten näyttämiseen
             function displayResults(products) {
                 resultsDiv.innerHTML = ''; // Varmuuden vuoksi tyhjennys
+                const t = translations[currentLanguage];
     
                 if (products.length === 0) {
-                    resultsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 col-span-full">Ei tuloksia hakusanalla.</p>';
+                    resultsDiv.innerHTML = `<p class="text-gray-500 dark:text-gray-400 col-span-full">${t.noResults}</p>`;
                     return;
                 }
     
@@ -162,10 +248,10 @@
                         <img src="${product.imageUrl}" alt="${product.name}" class="product-image" onerror="this.src='https://placehold.co/300x400/cccccc/969696?text=Kuva+ei+lataudu'; this.onerror=null;">
                         <div>
                             <h3 class="product-title">${product.name}</h3>
-                            <p class="product-details">Tyyli: ${product.style}, Tyyppi: ${product.type}</p>
+                            <p class="product-details">${t.style}: ${product.style}, ${t.type}: ${product.type}</p>
                             <p class="product-price">${product.price}</p>
                         </div>
-                        <a href="${product.storeUrl}" target="_blank" class="product-link">Kauppaan (placeholder)</a>
+                        <a href="${product.storeUrl}" target="_blank" class="product-link">${t.goToStore}</a>
                     `;
                     resultsDiv.appendChild(productElement);
                 });
