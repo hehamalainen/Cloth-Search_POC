@@ -72,6 +72,26 @@
         </div>
     
         <script>
+            // Helper function to escape HTML to prevent XSS
+            function escapeHtml(text) {
+                if (text == null) return ''; // Handle null/undefined
+                if (typeof text !== 'string') text = String(text); // Convert to string
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Helper function to validate URL safety
+            function isSafeUrl(url) {
+                if (!url || typeof url !== 'string') return false;
+                try {
+                    const parsed = new URL(url, window.location.href);
+                    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+                } catch {
+                    return false;
+                }
+            }
+
             // Internationalization - Translations
             const translations = {
                 fi: {
@@ -245,10 +265,11 @@
                     const safeStyle = escapeHtml(product.style);
                     const safeType = escapeHtml(product.type);
                     const safePrice = escapeHtml(product.price);
-                    // Validate and sanitize URLs
-                    const safeImageUrl = isSafeUrl(product.imageUrl) ? escapeHtml(product.imageUrl) : 'https://placehold.co/300x400/cccccc/969696?text=Invalid+Image';
-                    const safeStoreUrl = isSafeUrl(product.storeUrl) ? escapeHtml(product.storeUrl) : '#';
-                    const errorImageText = escapeHtml(window.currentTranslations.imageError).replace(/ /g, '+');
+                    // Validate URLs (don't escape them as they need to be valid URLs)
+                    const safeImageUrl = isSafeUrl(product.imageUrl) ? product.imageUrl : 'https://placehold.co/300x400/cccccc/969696?text=Invalid+Image';
+                    const safeStoreUrl = isSafeUrl(product.storeUrl) ? product.storeUrl : '#';
+                    // Prepare error image text (replace spaces before using in URL)
+                    const errorImageText = window.currentTranslations.imageError.replace(/ /g, '+');
     
                     // Käytetään product-objektin kenttiä suoraan
                     productElement.innerHTML = `
@@ -266,26 +287,6 @@
 
             // Initialize language on page load
             updateLanguage();
-
-            // Helper function to escape HTML to prevent XSS
-            function escapeHtml(text) {
-                if (text == null) return ''; // Handle null/undefined
-                if (typeof text !== 'string') text = String(text); // Convert to string
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            // Helper function to validate URL safety
-            function isSafeUrl(url) {
-                if (!url || typeof url !== 'string') return false;
-                try {
-                    const parsed = new URL(url, window.location.href);
-                    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-                } catch {
-                    return false;
-                }
-            }
     
         </script>
     
