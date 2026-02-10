@@ -245,13 +245,14 @@
                     const safeStyle = escapeHtml(product.style);
                     const safeType = escapeHtml(product.type);
                     const safePrice = escapeHtml(product.price);
-                    const safeImageUrl = escapeHtml(product.imageUrl);
+                    // Validate and sanitize URLs
+                    const safeImageUrl = isSafeUrl(product.imageUrl) ? escapeHtml(product.imageUrl) : 'https://placehold.co/300x400/cccccc/969696?text=Invalid+Image';
                     const safeStoreUrl = isSafeUrl(product.storeUrl) ? escapeHtml(product.storeUrl) : '#';
-                    const errorImageUrl = encodeURIComponent(window.currentTranslations.imageError);
+                    const errorImageText = escapeHtml(window.currentTranslations.imageError).replace(/ /g, '+');
     
                     // Käytetään product-objektin kenttiä suoraan
                     productElement.innerHTML = `
-                        <img src="${safeImageUrl}" alt="${safeName}" class="product-image" onerror="this.src='https://placehold.co/300x400/cccccc/969696?text=${errorImageUrl}'; this.onerror=null;">
+                        <img src="${safeImageUrl}" alt="${safeName}" class="product-image" onerror="this.src='https://placehold.co/300x400/cccccc/969696?text=${errorImageText}'; this.onerror=null;">
                         <div>
                             <h3 class="product-title">${safeName}</h3>
                             <p class="product-details">${window.currentTranslations.styleLabel} ${safeStyle}, ${window.currentTranslations.typeLabel} ${safeType}</p>
@@ -268,6 +269,8 @@
 
             // Helper function to escape HTML to prevent XSS
             function escapeHtml(text) {
+                if (text == null) return ''; // Handle null/undefined
+                if (typeof text !== 'string') text = String(text); // Convert to string
                 const div = document.createElement('div');
                 div.textContent = text;
                 return div.innerHTML;
@@ -275,6 +278,7 @@
 
             // Helper function to validate URL safety
             function isSafeUrl(url) {
+                if (!url || typeof url !== 'string') return false;
                 try {
                     const parsed = new URL(url, window.location.href);
                     return parsed.protocol === 'http:' || parsed.protocol === 'https:';
