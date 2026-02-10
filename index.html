@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Vaatehaku POC (Fuse.js)</title>
+        <title id="pageTitle">Vaatehaku POC (Fuse.js)</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
             tailwind.config = {
@@ -40,8 +40,12 @@
     
         <div class="max-w-6xl mx-auto">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Vaatehaku POC (Fuse.js)</h1>
-                <button id="darkModeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200" aria-label="Toggle dark mode">
+                <h1 id="mainTitle" class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Vaatehaku POC (Fuse.js)</h1>
+                <div class="flex gap-2">
+                    <button id="languageToggle" class="p-2 px-4 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 text-gray-800 dark:text-gray-200 font-semibold" aria-label="Toggle language">
+                        <span id="languageLabel">FI</span>
+                    </button>
+                    <button id="darkModeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200" aria-label="Toggle dark mode">
                     <svg id="sunIcon" class="w-6 h-6 text-gray-800 dark:text-gray-200 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
@@ -52,7 +56,7 @@
             </div>
     
             <div class="mb-8 bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md dark:shadow-lg">
-                <label for="searchInput" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Etsi tyyliä tai vaatetta (esim. goth mekko, grunge paita):</label>
+                <label for="searchInput" id="searchLabel" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Etsi tyyliä tai vaatetta (esim. goth mekko, grunge paita):</label>
                 <div class="flex flex-col md:flex-row">
                     <input type="text" id="searchInput" placeholder="esim. goth, grunge paita..." class="flex-grow p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-400 dark:focus:border-indigo-400 mb-2 md:mb-0 md:mr-2 placeholder-gray-500 dark:placeholder-gray-400">
                     <button id="searchButton" class="px-5 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-md hover:bg-indigo-700 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 dark:focus:ring-offset-gray-900 whitespace-nowrap">
@@ -61,13 +65,92 @@
                 </div>
             </div>
     
-            <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Tulokset:</h2>
+            <h2 id="resultsHeading" class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Tulokset:</h2>
             <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <p class="text-gray-500 dark:text-gray-400 col-span-full">Ei hakua vielä tehty.</p>
+                <p id="noSearchMessage" class="text-gray-500 dark:text-gray-400 col-span-full">Ei hakua vielä tehty.</p>
             </div>
         </div>
     
         <script>
+            // Internationalization - Translations
+            const translations = {
+                fi: {
+                    pageTitle: "Vaatehaku POC (Fuse.js)",
+                    mainTitle: "Vaatehaku POC (Fuse.js)",
+                    searchLabel: "Etsi tyyliä tai vaatetta (esim. goth mekko, grunge paita):",
+                    searchPlaceholder: "esim. goth, grunge paita...",
+                    searchButton: "Hae",
+                    resultsHeading: "Tulokset:",
+                    noSearchMessage: "Ei hakua vielä tehty.",
+                    enterSearchTerm: "Kirjoita hakusana.",
+                    noResults: "Ei tuloksia hakusanalla.",
+                    styleLabel: "Tyyli:",
+                    typeLabel: "Tyyppi:",
+                    storeLink: "Kauppaan (placeholder)",
+                    imageError: "Kuva ei lataudu",
+                    languageCode: "FI"
+                },
+                sv: {
+                    pageTitle: "Klädsökning POC (Fuse.js)",
+                    mainTitle: "Klädsökning POC (Fuse.js)",
+                    searchLabel: "Sök stil eller klädesplagg (t.ex. goth klänning, grunge tröja):",
+                    searchPlaceholder: "t.ex. goth, grunge tröja...",
+                    searchButton: "Sök",
+                    resultsHeading: "Resultat:",
+                    noSearchMessage: "Ingen sökning gjord ännu.",
+                    enterSearchTerm: "Skriv ett sökord.",
+                    noResults: "Inga resultat för sökningen.",
+                    styleLabel: "Stil:",
+                    typeLabel: "Typ:",
+                    storeLink: "Till butiken (placeholder)",
+                    imageError: "Bild laddas inte",
+                    languageCode: "SV"
+                }
+            };
+
+            // Current language state
+            let currentLanguage = localStorage.getItem('language') || 'fi';
+
+            // Function to update UI text based on current language
+            function updateLanguage() {
+                const t = translations[currentLanguage];
+                
+                // Update page elements
+                document.getElementById('pageTitle').textContent = t.pageTitle;
+                document.getElementById('mainTitle').textContent = t.mainTitle;
+                document.getElementById('searchLabel').textContent = t.searchLabel;
+                document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+                document.getElementById('searchButton').textContent = t.searchButton;
+                document.getElementById('resultsHeading').textContent = t.resultsHeading;
+                document.getElementById('languageLabel').textContent = t.languageCode;
+                
+                // Update HTML lang attribute
+                document.documentElement.lang = currentLanguage;
+                
+                // Update initial message if it exists
+                const noSearchMsg = document.getElementById('noSearchMessage');
+                if (noSearchMsg) {
+                    noSearchMsg.textContent = t.noSearchMessage;
+                }
+                
+                // Store translations globally for use in functions
+                window.currentTranslations = t;
+            }
+
+            // Language toggle functionality
+            const languageToggle = document.getElementById('languageToggle');
+            languageToggle.addEventListener('click', () => {
+                currentLanguage = currentLanguage === 'fi' ? 'sv' : 'fi';
+                localStorage.setItem('language', currentLanguage);
+                updateLanguage();
+                
+                // Re-run search if there are results displayed
+                const resultsDiv = document.getElementById('results');
+                if (resultsDiv.children.length > 0 && !resultsDiv.querySelector('p')) {
+                    performSearch();
+                }
+            });
+
             // Dark mode toggle functionality
             const darkModeToggle = document.getElementById('darkModeToggle');
             const htmlElement = document.documentElement;
@@ -130,7 +213,7 @@
                 resultsDiv.innerHTML = ''; // Tyhjennä vanhat tulokset
     
                 if (!query) {
-                    resultsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 col-span-full">Kirjoita hakusana.</p>';
+                    resultsDiv.innerHTML = `<p class="text-gray-500 dark:text-gray-400 col-span-full">${window.currentTranslations.enterSearchTerm}</p>`;
                     return;
                 }
     
@@ -149,7 +232,7 @@
                 resultsDiv.innerHTML = ''; // Varmuuden vuoksi tyhjennys
     
                 if (products.length === 0) {
-                    resultsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 col-span-full">Ei tuloksia hakusanalla.</p>';
+                    resultsDiv.innerHTML = `<p class="text-gray-500 dark:text-gray-400 col-span-full">${window.currentTranslations.noResults}</p>`;
                     return;
                 }
     
@@ -159,17 +242,20 @@
     
                     // Käytetään product-objektin kenttiä suoraan
                     productElement.innerHTML = `
-                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" onerror="this.src='https://placehold.co/300x400/cccccc/969696?text=Kuva+ei+lataudu'; this.onerror=null;">
+                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" onerror="this.src='https://placehold.co/300x400/cccccc/969696?text=${encodeURIComponent(window.currentTranslations.imageError)}'; this.onerror=null;">
                         <div>
                             <h3 class="product-title">${product.name}</h3>
-                            <p class="product-details">Tyyli: ${product.style}, Tyyppi: ${product.type}</p>
+                            <p class="product-details">${window.currentTranslations.styleLabel} ${product.style}, ${window.currentTranslations.typeLabel} ${product.type}</p>
                             <p class="product-price">${product.price}</p>
                         </div>
-                        <a href="${product.storeUrl}" target="_blank" class="product-link">Kauppaan (placeholder)</a>
+                        <a href="${product.storeUrl}" target="_blank" class="product-link">${window.currentTranslations.storeLink}</a>
                     `;
                     resultsDiv.appendChild(productElement);
                 });
             }
+
+            // Initialize language on page load
+            updateLanguage();
     
         </script>
     
