@@ -144,9 +144,9 @@
                 localStorage.setItem('language', currentLanguage);
                 updateLanguage();
                 
-                // Re-run search if there are results displayed
+                // Re-run search if there are product results displayed
                 const resultsDiv = document.getElementById('results');
-                if (resultsDiv.children.length > 0 && !resultsDiv.querySelector('p')) {
+                if (resultsDiv.querySelector('.product-card')) {
                     performSearch();
                 }
             });
@@ -240,15 +240,24 @@
                     const productElement = document.createElement('div');
                     productElement.className = 'product-card'; // Tailwind-luokka
     
+                    // Sanitize all product data to prevent XSS
+                    const safeName = escapeHtml(product.name);
+                    const safeStyle = escapeHtml(product.style);
+                    const safeType = escapeHtml(product.type);
+                    const safePrice = escapeHtml(product.price);
+                    const safeImageUrl = escapeHtml(product.imageUrl);
+                    const safeStoreUrl = isSafeUrl(product.storeUrl) ? escapeHtml(product.storeUrl) : '#';
+                    const errorImageUrl = encodeURIComponent(window.currentTranslations.imageError);
+    
                     // Käytetään product-objektin kenttiä suoraan
                     productElement.innerHTML = `
-                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" onerror="this.src='https://placehold.co/300x400/cccccc/969696?text=${encodeURIComponent(window.currentTranslations.imageError)}'; this.onerror=null;">
+                        <img src="${safeImageUrl}" alt="${safeName}" class="product-image" onerror="this.src='https://placehold.co/300x400/cccccc/969696?text=${errorImageUrl}'; this.onerror=null;">
                         <div>
-                            <h3 class="product-title">${product.name}</h3>
-                            <p class="product-details">${window.currentTranslations.styleLabel} ${product.style}, ${window.currentTranslations.typeLabel} ${product.type}</p>
-                            <p class="product-price">${product.price}</p>
+                            <h3 class="product-title">${safeName}</h3>
+                            <p class="product-details">${window.currentTranslations.styleLabel} ${safeStyle}, ${window.currentTranslations.typeLabel} ${safeType}</p>
+                            <p class="product-price">${safePrice}</p>
                         </div>
-                        <a href="${product.storeUrl}" target="_blank" class="product-link">${window.currentTranslations.storeLink}</a>
+                        <a href="${safeStoreUrl}" target="_blank" class="product-link">${window.currentTranslations.storeLink}</a>
                     `;
                     resultsDiv.appendChild(productElement);
                 });
@@ -256,6 +265,23 @@
 
             // Initialize language on page load
             updateLanguage();
+
+            // Helper function to escape HTML to prevent XSS
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Helper function to validate URL safety
+            function isSafeUrl(url) {
+                try {
+                    const parsed = new URL(url, window.location.href);
+                    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+                } catch {
+                    return false;
+                }
+            }
     
         </script>
     
