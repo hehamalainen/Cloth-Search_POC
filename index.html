@@ -74,7 +74,7 @@
         <script>
             // Helper function to escape HTML to prevent XSS
             function escapeHtml(text) {
-                if (text == null) return ''; // Handle null/undefined
+                if (text == null) return ''; // Handle null/undefined (intentional == for both)
                 if (typeof text !== 'string') text = String(text); // Convert to string
                 const div = document.createElement('div');
                 div.textContent = text;
@@ -164,7 +164,7 @@
                 localStorage.setItem('language', currentLanguage);
                 updateLanguage();
                 
-                // Re-run search if there are product results displayed
+                // Re-run search if there are product results displayed (check for product cards in DOM)
                 const resultsDiv = document.getElementById('results');
                 if (resultsDiv.querySelector('.product-card')) {
                     performSearch();
