@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+    <html lang="de">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Kleidungssuche POC (Fuse.js)</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                darkMode: 'class'
+            }
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+        <style type="text/tailwindcss">
+            /* Tailwind-Erweiterungen und Grundeinstellungen */
+            body {
+                @apply bg-gray-100 dark:bg-gray-900 font-sans transition-colors duration-200;
+            }
+            .product-card {
+                 @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow p-4 text-center flex flex-col justify-between transition-shadow duration-200 hover:shadow-md dark:hover:shadow-lg;
+            }
+            .product-image {
+                 @apply w-full h-48 object-cover mb-3 rounded bg-gray-200 dark:bg-gray-700;
+            }
+            .product-title {
+                @apply text-lg font-semibold text-gray-800 dark:text-gray-100 mb-1;
+            }
+            .product-details {
+                @apply text-sm text-gray-600 dark:text-gray-400 mb-2;
+            }
+            .product-price {
+                @apply text-md font-bold text-gray-900 dark:text-gray-100 mb-3;
+            }
+            .product-link {
+                @apply inline-block mt-auto px-4 py-2 bg-gray-800 dark:bg-gray-700 text-white text-sm rounded hover:bg-gray-900 dark:hover:bg-gray-600 transition duration-150;
+            }
+        </style>
+    </head>
+    <body class="p-4 md:p-8">
+    
+        <div class="max-w-6xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Kleidungssuche POC (Fuse.js)</h1>
+                <button id="darkModeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200" aria-label="Dunkelmodus umschalten">
+                    <svg id="sunIcon" class="w-6 h-6 text-gray-800 dark:text-gray-200 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <svg id="moonIcon" class="w-6 h-6 text-gray-800 dark:text-gray-200 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </button>
+            </div>
+    
+            <div class="mb-8 bg-white dark:bg-gray-800 p-5 rounded-lg shadow-md dark:shadow-lg">
+                <label for="searchInput" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Suchen Sie nach einem Stil oder Kleidungsstück (z.B. Gothic Kleid, Grunge Hemd):</label>
+                <div class="flex flex-col md:flex-row">
+                    <input type="text" id="searchInput" placeholder="z.B. Gothic, Grunge Hemd..." class="flex-grow p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-400 dark:focus:border-indigo-400 mb-2 md:mb-0 md:mr-2 placeholder-gray-500 dark:placeholder-gray-400">
+                    <button id="searchButton" class="px-5 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-md hover:bg-indigo-700 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 dark:focus:ring-offset-gray-900 whitespace-nowrap">
+                        Suchen
+                    </button>
+                </div>
+            </div>
+    
+            <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">Ergebnisse:</h2>
+            <div id="results" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <p class="text-gray-500 dark:text-gray-400 col-span-full">Noch keine Suche durchgeführt.</p>
+            </div>
+        </div>
+    
+        <script>
+            // Dark mode toggle functionality
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const htmlElement = document.documentElement;
+
+            // Check for saved theme preference or default to light mode
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            if (currentTheme === 'dark') {
+                htmlElement.classList.add('dark');
+            }
+
+            darkModeToggle.addEventListener('click', () => {
+                htmlElement.classList.toggle('dark');
+                
+                // Save preference
+                const theme = htmlElement.classList.contains('dark') ? 'dark' : 'light';
+                localStorage.setItem('theme', theme);
+            });
+
+            // Hartcodierte Datenmodell (Mock Data)
+            const mockProducts = [
+                { id: 1, name: "Samt Gothic Maxikleid", style: "Gothic", type: "Kleid", price: "89,90 €", imageUrl: "https://placehold.co/300x400/000000/FFFFFF?text=Gothic+Kleid", storeUrl: "#" },
+                { id: 2, name: "Zerrissene Grunge Jeans", style: "Grunge", type: "Jeans", price: "55,00 €", imageUrl: "https://placehold.co/300x400/808080/FFFFFF?text=Grunge+Jeans", storeUrl: "#" },
+                { id: 3, name: "Blumen Coquette Bluse", style: "Coquette", type: "Bluse", price: "42,50 €", imageUrl: "https://placehold.co/300x400/FFC0CB/000000?text=Coquette+Bluse", storeUrl: "#" },
+                { id: 4, name: "Schwarze Plateau Stiefel", style: "Gothic", type: "Stiefel", price: "110,00 €", imageUrl: "https://placehold.co/300x400/2F4F4F/FFFFFF?text=Gothic+Stiefel", storeUrl: "#" },
+                { id: 5, name: "Kariertes Grunge Hemd", style: "Grunge", type: "Hemd", price: "38,00 €", imageUrl: "https://placehold.co/300x400/A52A2A/FFFFFF?text=Grunge+Hemd", storeUrl: "#" },
+                { id: 6, name: "Spitzen Coquette Rock", style: "Coquette", type: "Rock", price: "48,00 €", imageUrl: "https://placehold.co/300x400/FFF0F5/000000?text=Coquette+Rock", storeUrl: "#" },
+                { id: 7, name: "Nietengürtel Gothic", style: "Gothic", type: "Accessoire", price: "25,00 €", imageUrl: "https://placehold.co/300x400/1a1a1a/FFFFFF?text=Gothic+Gürtel", storeUrl: "#"},
+                { id: 8, name: "Oversized Grunge Hoodie", style: "Grunge", type: "Hoodie", price: "65,00 €", imageUrl: "https://placehold.co/300x400/696969/FFFFFF?text=Grunge+Hoodie", storeUrl: "#"}
+            ];
+    
+            // Fuse.js Einstellungen
+            const fuseOptions = {
+              // Welche Felder des Produkts für die Suche verwendet werden
+              keys: ['name', 'style', 'type'],
+              includeScore: false, // Relevanzpunkte werden noch nicht benötigt
+              threshold: 0.4, // Suchgenauigkeit (0.0 = perfekte Übereinstimmung, 1.0 = beliebig)
+              ignoreLocation: true, // Suche Übereinstimmungen an beliebiger Stelle im Text
+              minMatchCharLength: 2 // Minimale Zeichenanzahl für eine Übereinstimmung
+            };
+    
+            // Initialisieren Sie Fuse mit Mock-Daten und Einstellungen
+            const fuse = new Fuse(mockProducts, fuseOptions);
+    
+            // Elemente aus dem DOM abrufen
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const resultsDiv = document.getElementById('results');
+    
+            // Event-Listener hinzufügen
+            searchButton.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    performSearch();
+                }
+            });
+    
+            // Funktion zum Durchführen der Suche mit Fuse.js
+            function performSearch() {
+                const query = searchInput.value.trim();
+                resultsDiv.innerHTML = ''; // Alte Ergebnisse löschen
+    
+                if (!query) {
+                    resultsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 col-span-full">Bitte geben Sie einen Suchbegriff ein.</p>';
+                    return;
+                }
+    
+                // Suche mit Fuse.js durchführen
+                const fuseResults = fuse.search(query);
+    
+                // Konvertieren Sie die Fuse-Ergebnisse in das Format, das displayResults erwartet
+                // Fuse gibt eine Liste von Objekten zurück, die 'item' enthalten (das Originalprodukt)
+                const productsToDisplay = fuseResults.map(result => result.item);
+    
+                displayResults(productsToDisplay);
+            }
+    
+            // Funktion zum Anzeigen der Ergebnisse
+            function displayResults(products) {
+                resultsDiv.innerHTML = ''; // Zur Sicherheit löschen
+    
+                if (products.length === 0) {
+                    resultsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 col-span-full">Keine Ergebnisse für den Suchbegriff gefunden.</p>';
+                    return;
+                }
+    
+                products.forEach(product => { // Verwenden Sie das product-Objekt direkt
+                    const productElement = document.createElement('div');
+                    productElement.className = 'product-card'; // Tailwind-Klasse
+    
+                    // Verwenden Sie die Felder des product-Objekts direkt
+                    productElement.innerHTML = `
+                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" onerror="this.src='https://placehold.co/300x400/cccccc/969696?text=Bild+lädt+nicht'; this.onerror=null;">
+                        <div>
+                            <h3 class="product-title">${product.name}</h3>
+                            <p class="product-details">Stil: ${product.style}, Typ: ${product.type}</p>
+                            <p class="product-price">${product.price}</p>
+                        </div>
+                        <a href="${product.storeUrl}" target="_blank" class="product-link">Zum Shop (Platzhalter)</a>
+                    `;
+                    resultsDiv.appendChild(productElement);
+                });
+            }
+    
+        </script>
+    
+    </body>
+    </html>
